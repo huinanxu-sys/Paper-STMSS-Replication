@@ -1,0 +1,3 @@
+System,Inference_Latency_ms,Mechanical_Latency_ms,Total_Latency_ms,Deadline_ms,Margin_ms,Status
+YOLOv8n_ByteTrack,47.29,25.0,72.29,75.0,2.71,MARGINAL
+STMSS_Proposed,18.82,25.0,43.82,75.0,31.18,GUARANTEED
