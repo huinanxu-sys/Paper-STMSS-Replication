@@ -1,0 +1,5 @@
+Stage,Description,Mean_ms,Std_ms,P95_ms,Percentage_of_Total
+Stage A,Photon-Starved Signal Restoration (Entropy Maximization),4.59,1.26,6.76,24.4
+Stage B,Spatio-Temporal Motion Saliency Detection,13.28,2.26,17.21,70.5
+Stage C,PI-EOKF Online State Estimation,0.95,0.27,1.31,5.1
+Total,End-to-End System Latency,18.82,3.23,24.29,100.0
