@@ -12,7 +12,7 @@ plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["font.size"] = 14
 plt.rcParams["axes.linewidth"] = 1.5
 
-CSV_PATH = Path(__file__).parent.parent / "04_Data_GroundTruth" / "figure6_ga_convergence.csv"
+CSV_PATH = Path(__file__).parent.parent / "data" / "csv" / "figure6_ga_convergence.csv"
 
 
 def load_convergence_data(csv_path):
@@ -74,7 +74,7 @@ def create_figure():
 
     plt.tight_layout()
 
-    output_prefix = 'Figure6_GA_Convergence_FromCSV'
+    output_prefix = str(Path(__file__).resolve().parent / 'Figure6_GA_Convergence_FromCSV')
     plt.savefig(f'{output_prefix}.pdf', dpi=600, bbox_inches='tight', facecolor='white')
     plt.savefig(f'{output_prefix}.png', dpi=600, bbox_inches='tight', facecolor='white')
     plt.savefig(f'{output_prefix}.svg', format='svg', bbox_inches='tight', facecolor='white')

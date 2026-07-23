@@ -1,85 +1,84 @@
 """
-Figure 9: PAD Workload Distribution
-Pneumatic Actuation Debounce (PAD) workload reduction effect
+Figure 9: Pneumatic Actuation Debounce (PAD) Workload Reduction.
 
-Data source: 04_Data_GroundTruth/figure9_pad_workload.csv
+Grouped bar chart of the actuation command counts before and after
+the PAD filter for the five canonical test sequences. Values are
+read from ``data/csv/figure9_pad_workload.csv``. The figure has no
+embedded title; the caption is supplied in the manuscript.
 """
+
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import csv
-from pathlib import Path
 
 plt.rcParams['font.family'] = 'sans-serif'
-plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans']
+plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial']
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['axes.linewidth'] = 1.2
 plt.rcParams['font.size'] = 11
 plt.rcParams['figure.dpi'] = 600
 plt.rcParams['savefig.dpi'] = 600
 
-CSV_PATH = Path(__file__).parent.parent / "04_Data_GroundTruth" / "figure9_pad_workload.csv"
+THIS_DIR = Path(__file__).resolve().parent
+DATA_CSV = THIS_DIR.parent / "data" / "csv" / "figure9_pad_workload.csv"
 
 
-def load_workload_data(csv_path):
-    frames = []
-    original = []
-    filtered = []
-    reduction = []
-    
+def _load_workload_csv(csv_path):
+    import csv
+    seqs, raw, filt, red = [], [], [], []
     with open(csv_path, 'r', newline='') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            frames.append(int(row['Frame']))
-            original.append(int(row['Original_Detections']))
-            filtered.append(int(row['Filtered_Detections']))
-            reduction.append(float(row['Reduction_Percent']))
-    
-    return np.array(frames), np.array(original), np.array(filtered), np.array(reduction)
+        for row in csv.DictReader(f):
+            seqs.append(row['Sequence'])
+            raw.append(int(row['Raw_Triggers']))
+            filt.append(int(row['Post_PAD_Triggers']))
+            red.append(float(row['Reduction_Percent']))
+    return seqs, np.array(raw), np.array(filt), np.array(red)
 
 
 def create_figure9():
-    if not CSV_PATH.exists():
-        raise FileNotFoundError(f"Data file not found: {CSV_PATH}")
-    
-    frames, original, filtered, reduction = load_workload_data(CSV_PATH)
-    
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6), 
-                                    gridspec_kw={'height_ratios': [2, 1]})
-    
-    ax1.fill_between(frames, original, alpha=0.3, color='#ef4444', 
-                     label='Original Detections (w/o PAD)')
-    ax1.fill_between(frames, filtered, alpha=0.5, color='#059669',
-                     label='Filtered Detections (w/ PAD)')
-    ax1.plot(frames, original, color='#ef4444', linewidth=1.5, linestyle='--')
-    ax1.plot(frames, filtered, color='#059669', linewidth=2)
-    
-    ax1.set_ylabel('Number of Detections', fontweight='bold')
-    ax1.legend(loc='upper right', framealpha=0.95, fontsize=9)
-    ax1.grid(True, linestyle=':', alpha=0.4)
-    ax1.spines['top'].set_visible(False)
-    ax1.spines['right'].set_visible(False)
-    
-    ax2.bar(frames, reduction, width=30, color='#3b82f6', alpha=0.7,
-            edgecolor='#1e40af', linewidth=1)
-    ax2.axhline(y=np.mean(reduction), color='#ef4444', linestyle='--', 
-                linewidth=2, label=f'Mean Reduction: {np.mean(reduction):.1f}%')
-    
-    ax2.set_xlabel('Frame Number', fontweight='bold')
-    ax2.set_ylabel('Reduction (%)', fontweight='bold')
-    ax2.legend(loc='upper right', framealpha=0.95, fontsize=9)
-    ax2.grid(axis='y', linestyle=':', alpha=0.4)
-    ax2.spines['top'].set_visible(False)
-    ax2.spines['right'].set_visible(False)
-    
-    plt.tight_layout()
-    
-    plt.savefig('Figure9_PAD_Workload.pdf',
-                bbox_inches='tight', facecolor='white')
-    plt.savefig('Figure9_PAD_Workload.png',
-                bbox_inches='tight', facecolor='white')
+    if not DATA_CSV.exists():
+        raise FileNotFoundError(f"Missing: {DATA_CSV}")
 
-    print(f"Figure 9 generated from CSV: {CSV_PATH}")
+    sequences, raw, filt, red = _load_workload_csv(DATA_CSV)
+    n = len(sequences)
+
+    fig, ax = plt.subplots(figsize=(9, 5), dpi=600)
+    x = np.arange(n)
+    w = 0.35
+
+    ax.bar(x - w/2, raw,  w, color='#d0d9e8', edgecolor='#555555',
+           label='Raw Kinematic Triggers')
+    ax.bar(x + w/2, filt, w, color='#3b5998', edgecolor='#111111',
+           label='Post-PAD Filtered Triggers')
+
+    for i in range(n):
+        ax.text(x[i] - w/2, raw[i]  + max(raw) * 0.015, f"{raw[i]}",
+                ha='center', va='bottom', fontsize=9, color='#1f2937')
+        ax.text(x[i] + w/2, filt[i] + max(raw) * 0.015, f"{filt[i]}",
+                ha='center', va='bottom', fontsize=9, color='#0f172a')
+        ax.text(x[i], max(raw[i], filt[i]) * 0.55, f"{red[i]:+.2f}%",
+                ha='center', va='center', fontsize=10, weight='bold',
+                color='#0f172a',
+                bbox=dict(boxstyle='round,pad=0.3',
+                          facecolor='#fef3c7', edgecolor='#92400e', linewidth=0.8))
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(sequences, rotation=20, ha='right', fontsize=10)
+    ax.set_ylabel('Actuation Command Count', fontweight='bold')
+    ax.set_xlabel('Test Sequence', fontweight='bold')
+    ax.set_ylim(0, max(raw) * 1.18)
+    ax.grid(axis='y', linestyle=':', alpha=0.4)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.legend(loc='upper right', framealpha=0.95, fontsize=9)
+
+    plt.tight_layout()
+    for ext, dpi in (('png', 600), ('pdf', None), ('svg', None)):
+        plt.savefig(THIS_DIR / f'Figure9_PAD_Workload.{ext}',
+                    bbox_inches='tight', facecolor='white', dpi=dpi)
+    plt.close(fig)
+    print("Figure 9 written (Figure9_PAD_Workload.png/pdf/svg)")
 
 
 if __name__ == "__main__":

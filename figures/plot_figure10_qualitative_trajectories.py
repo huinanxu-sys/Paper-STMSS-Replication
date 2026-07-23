@@ -1,5 +1,14 @@
 """
-Figure 10: Qualitative Tracking Trajectories Visualization
+Figure 10: Qualitative Tracking Trajectories Visualization.
+
+This figure is a SCHEMATIC illustration of the four canonical
+qualitative scenarios (continuous tracking, debris rejection, Lévy
+fragmentation, congestion). The trajectory curves are simulated
+parametric paths, not raw tracker outputs; the per-frame
+track-CSVs are produced by the full pipeline in
+``src/stmss_tracker__FullPipeline.py``. Sample video files are not
+redistributed in this package; if the `08_Sample_Videos/` directory
+is absent, the panels fall back to a blank canvas.
 """
 
 import cv2

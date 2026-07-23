@@ -1,8 +1,12 @@
 """
 Figure 2: Monte Carlo Sensitivity Analysis of Capture Probability
-Demonstrates how the system ensures P_capture >= 95.2% at 18.82 ms latency.
-Monte Carlo sampling: 10^6 iterations (consistent with paper Section 2.1)
+Demonstrates how the system ensures P_capture >= 95.2% at the STMSS
+operating-point latency. Monte Carlo sampling: 10^6 iterations
+(deterministic seed=42; the same draw is used for every panel so the
+P_capture curves are reproducible from a single cold run).
 """
+
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,12 +42,43 @@ def monte_carlo_capture_prob(r_capture, t_latency, v_max, n_simulations=1000000)
     return np.mean(captured)
 
 
+def _read_stmss_latency_ms() -> float:
+    """Read the STMSS Culex_Transit mean latency from the raw CSV. Used
+    only as the annotation point on the P_capture vs latency panel; the
+    Monte Carlo curves themselves are deterministic from the
+    physical-model inputs (R, v, n_simulations, seed)."""
+    import csv
+    p = Path(__file__).resolve().parent.parent / "data" / "csv" / \
+        "table1_semantic_baselines.csv"
+    if not p.exists():
+        raise FileNotFoundError(
+            f"Raw STMSS latency CSV not found: {p}. This file is the "
+            "single source of truth for the Figure 2 STMSS annotation; "
+            "do not run this script without it."
+        )
+    header = None
+    with open(p, "r", newline="") as fh:
+        for line in fh:
+            stripped = line.lstrip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            cells = next(csv.reader([line.rstrip("\r\n")]))
+            if header is None:
+                header = cells
+                continue
+            row = dict(zip(header, cells))
+            if (row.get("Pipeline") == "STMSS"
+                    and row.get("Sequence") == "Culex_Transit"):
+                return float(row["Mean_ms"])
+    raise RuntimeError("STMSS Culex_Transit row not found in raw CSV")
+
+
 def create_figure2():
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    
+
     R_CAPTURE = 0.15
     V_MAX = 2.0
-    T_LATENCY_BASE = 0.01882
+    T_LATENCY_BASE = _read_stmss_latency_ms() / 1000.0   # ms -> s
     
     ax1 = axes[0]
     latencies = np.linspace(0.005, 0.050, 20)
@@ -108,9 +143,12 @@ def create_figure2():
 
     plt.tight_layout()
 
-    plt.savefig('Figure2_Monte_Carlo.pdf',
+    out_dir = Path(__file__).resolve().parent
+    plt.savefig(out_dir / 'Figure2_Monte_Carlo.pdf',
                 bbox_inches='tight', facecolor='white')
-    plt.savefig('Figure2_Monte_Carlo.png',
+    plt.savefig(out_dir / 'Figure2_Monte_Carlo.png',
+                bbox_inches='tight', facecolor='white', dpi=600)
+    plt.savefig(out_dir / 'Figure2_Monte_Carlo.svg',
                 bbox_inches='tight', facecolor='white')
 
     print("Figure 2 generated: Monte Carlo Simulation")

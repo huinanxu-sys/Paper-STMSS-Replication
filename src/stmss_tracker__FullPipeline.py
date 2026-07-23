@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-STMSS Integrated Tracker - Complete Implementation
+STMSS Integrated Tracker - Complete Implementation.
 
 Spatio-Temporal Motion Saliency System for micro-vector detection
-in photon-starved environments with <7ms latency constraint.
-
-Author: STMSS Research Team
-Date: 2026-05-09
+in photon-starved environments. The on-line pipeline is parameterised
+by a target_latency_ms configuration value (see ``STMSSConfig``); the
+integrated end-to-end latency on the Culex_Transit reference sequence
+is reported in ``data/csv/table1_semantic_baselines.csv`` and is not
+hardcoded in this file.
 """
 
 import cv2
@@ -548,44 +549,51 @@ def test_stmss_tracker():
     print("=" * 80)
     print("STMSS Tracker Test")
     print("=" * 80)
-    print("\n⚠️  注意: 本测试使用纯合成的圆圈图像，仅用于验证 Pipeline API 的")
-    print("   连通性和延迟计算，论文真实结果由高密度农业视频跑出。")
-    
-    # Create tracker
-    config = STMSSConfig(target_latency_ms=7.0)
+    print("\nNOTE: This test uses purely synthetic circle images and is intended")
+    print("      to validate the Pipeline API connectivity and latency logic only.")
+    print("      Production-grade results are produced by the high-density")
+    print("      agricultural video benchmark, not by this test.")
+
+    # Use the configuration's default target_latency_ms; do not hardcode
+    # any value here. The test prints the threshold from the config so
+    # the synthetic-frame result is interpretable without coupling the
+    # source code to any specific quantitative target in the paper.
+    config = STMSSConfig()
     tracker = STMSSTracker(config)
-    
+    target_ms = config.target_latency_ms
+
     # Test with synthetic video
     print("\n[1] Testing with synthetic frames...")
-    
+
     for i in range(50):
         # Create synthetic frame with moving object
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
-        
+
         # Add moving circle (simulating micro-vector)
         cx = 100 + i * 5
         cy = 200 + int(50 * np.sin(i * 0.2))
         cv2.circle(frame, (cx, cy), 10, (200, 200, 200), -1)
-        
+
         # Add noise (simulating photon-starved condition)
         noise = np.random.normal(0, 10, frame.shape).astype(np.uint8)
         frame = cv2.add(frame, noise)
-        
+
         # Process frame
         objects, vis, stats = tracker.process_frame(frame)
-        
+
         if i % 10 == 0:
             print(f"  Frame {i}: {stats['num_tracks']} tracks, "
                   f"{stats['latency_ms']:.2f}ms latency")
-    
+
     # Print summary
     summary = tracker.get_summary_stats()
     print("\n[2] Summary Statistics")
     print(f"  Total frames: {summary['total_frames']}")
     print(f"  Total tracks: {summary['total_tracks']}")
     print(f"  Avg latency: {summary['avg_latency_ms']:.2f}ms")
-    print(f"  Target <7ms: {'✓ MET' if summary['target_met'] else '✗ NOT MET'}")
-    
+    print(f"  Target T_comp = {target_ms:.2f} ms (config): "
+          f"{'MET' if summary['target_met'] else 'NOT MET'}")
+
     print("\n" + "=" * 80)
     print("STMSS Tracker Test Complete")
     print("=" * 80)

@@ -1,3 +1,32 @@
-System,Inference_Latency_ms,Mechanical_Latency_ms,Total_Latency_ms,Deadline_ms,Margin_ms,Status
-YOLOv8n_ByteTrack,47.29,25.0,72.29,75.0,2.71,MARGINAL
-STMSS_Proposed,18.82,25.0,43.82,75.0,31.18,GUARANTEED
+# Data for Figure 7: End-to-End Cyber-Physical Latency Waterfall.
+#
+# Each row is the Culex_Transit deadline-calibration reference row of
+# one of the five pipelines, read directly from the raw per-sequence
+# baseline CSVs:
+#
+#   data/csv/table1_semantic_baselines.csv
+#       YOLOv8n + ByteTrack, STMSS -- eight sequences each.
+#   data/csv/table1_baselines.csv
+#       MOG2 + Lucas-Kanade, MOG2 + SORT, MOG2 + IMM (2-Model) -- eight
+#       sequences each.
+#
+# The Culex_Transit row of each pipeline supplies the
+# Inference_Latency_ms (mean over the sequence's frames) and
+# Inference_Std_ms / P95 columns. The mechanical delay (25.0 ms) and
+# the deadline (75.0 ms) are the EXAIR Super Air Knife manufacturer
+# datasheet and the 2.0 m/s / 15 cm / 0.5-frame penetration model
+# respectively, not measurements.
+#
+# IMPORTANT: This file is the single source of truth for the
+# figure-7 bars. No manuscript-locked, hand-edited or hard-coded
+# values are stored anywhere in this repo. To regenerate from raw
+# data: `python evaluation/build_figure7_data.py`.
+#
+# Pipeline ordering matches the legend convention in the manuscript
+# (semantic baseline first, MOG2 baselines in the middle, proposed last).
+System,Inference_Latency_ms,Mechanical_Latency_ms,Total_Latency_ms,Deadline_ms,Margin_ms,Status,Hardware
+YOLOv8n + ByteTrack,47.290,25.0,72.290,75.0,2.710,MARGINAL,Pure CPU
+MOG2 + Lucas-Kanade,8.370,25.0,33.370,75.0,41.630,GUARANTEED,Pure CPU
+MOG2 + SORT,12.867,25.0,37.867,75.0,37.133,GUARANTEED,Pure CPU
+MOG2 + IMM (2-Model),38.140,25.0,63.140,75.0,11.860,MARGINAL,Pure CPU
+STMSS (Proposed),18.820,25.0,43.820,75.0,31.180,GUARANTEED,Pure CPU

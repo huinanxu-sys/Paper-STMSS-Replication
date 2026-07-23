@@ -177,9 +177,11 @@ class PhotonStarvedRestoration:
     
     def fast_photon_recovery(self, image: np.ndarray) -> np.ndarray:
         """
-        Fast version for real-time processing (<7ms constraint)
-        
-        Uses integral image approximation for O(1) entropy calculation
+        Fast version for real-time processing.
+
+        Uses integral image approximation for O(1) entropy calculation.
+        The latency target is taken from ``self.config.target_latency_ms``;
+        no manuscript-locked value is hardcoded here.
         """
         if len(image.shape) == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -413,11 +415,16 @@ class STMSSMetrics:
     - HOTA (Higher Order Tracking Accuracy)
     """
     
-    def __init__(self):
+    def __init__(self, target_latency_ms: float = None):
         self.latency_history = deque(maxlen=1000)
         self.fps_history = deque(maxlen=100)
         self.frame_times = deque(maxlen=100)
         self.start_time = None
+        # The latency target is read from the config at construction time
+        # so the comparison in get_current_stats has a well-defined value.
+        # If no target is supplied, the threshold is set to None and
+        # target_met is reported as False.
+        self._config_target_latency_ms = target_latency_ms
         
     def start_frame(self):
         """Mark start of frame processing"""
@@ -439,6 +446,7 @@ class STMSSMetrics:
     
     def get_current_stats(self) -> Dict:
         """Get current performance statistics"""
+        target_ms = getattr(self, "_config_target_latency_ms", None)
         stats = {
             'current_latency_ms': self.latency_history[-1] if self.latency_history else 0,
             'avg_latency_ms': np.mean(self.latency_history) if self.latency_history else 0,
@@ -446,13 +454,20 @@ class STMSSMetrics:
             'current_fps': self.fps_history[-1] if self.fps_history else 0,
             'avg_fps': np.mean(self.fps_history) if self.fps_history else 0,
             'min_fps': np.min(self.fps_history) if self.fps_history else 0,
-            'target_met': self.latency_history[-1] < 7.0 if self.latency_history else False
+            'target_met': (
+                (self.latency_history[-1] < target_ms)
+                if (target_ms is not None and self.latency_history)
+                else False
+            ),
         }
         return stats
     
     def print_stats(self):
         """Print performance statistics"""
         stats = self.get_current_stats()
+        target_ms = self._config_target_latency_ms
+        target_str = (f"{target_ms:.2f} ms (config)"
+                      if target_ms is not None else "not configured")
         print("\n[STMSS Performance Metrics]")
         print(f"  Latency: {stats['current_latency_ms']:.2f} ms "
               f"(avg: {stats['avg_latency_ms']:.2f} ms, "
@@ -460,7 +475,8 @@ class STMSSMetrics:
         print(f"  FPS: {stats['current_fps']:.1f} "
               f"(avg: {stats['avg_fps']:.1f}, "
               f"min: {stats['min_fps']:.1f})")
-        print(f"  Target <7ms: {'✓' if stats['target_met'] else '✗'}")
+        print(f"  Target T_comp = {target_str}: "
+              f"{'MET' if stats['target_met'] else 'NOT MET'}")
 
 
 # Integration helpers

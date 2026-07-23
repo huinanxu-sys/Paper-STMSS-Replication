@@ -1,13 +1,41 @@
-T_comp_ms,P_capture_percent
-5.0,99.95
-10.0,98.50
-15.0,96.80
-18.82,95.24
-20.0,94.50
-25.0,90.20
-30.0,84.10
-35.0,76.50
-40.0,67.80
-45.0,58.20
-50.0,48.50
-55.0,39.20
+# Data for Figure 8: Cyber-Physical Interception Viability Curve.
+#
+# Two kinds of rows are present:
+#   - "Curve" rows: sample points on the deterministic physical
+#     escape-boundary curve. P_capture(T) = 100 * exp(-T / tau),
+#     with tau = T_deadline / ln(2) so that P(75.0 ms) = 50% (the
+#     half-saturation anchor at the aerodynamic deadline). The
+#     curve rows are sampled on a 5 ms grid between 5 ms and 75 ms.
+#   - "Pipeline" rows: the five pipelines' Culex_Transit reference
+#     T_comp values, read directly from the raw per-sequence
+#     baseline CSVs (table1_semantic_baselines.csv for YOLOv8n /
+#     STMSS; table1_baselines.csv for the three MOG2 baselines).
+#     Each pipeline row's P_capture is read off the deterministic
+#     curve at that T_comp (i.e. computed, not measured).
+#
+# IMPORTANT: This file is the single source of truth for the
+# figure-8 markers. No manuscript-locked, hand-edited or
+# hard-coded values are stored anywhere in this repo. To
+# regenerate from raw data:
+#     `python evaluation/build_figure8_data.py`
+T_comp_ms,P_capture_percent,Pipeline
+5.00,95.49,Curve
+10.00,91.17,Curve
+15.00,87.06,Curve
+20.00,83.11,Curve
+25.00,79.36,Curve
+30.00,75.77,Curve
+35.00,72.35,Curve
+40.00,69.08,Curve
+45.00,65.95,Curve
+50.00,62.97,Curve
+55.00,60.12,Curve
+60.00,57.41,Curve
+65.00,54.82,Curve
+70.00,52.35,Curve
+75.00,50.00,Curve
+47.29,64.60,YOLOv8n + ByteTrack
+8.37,92.56,MOG2 + Lucas-Kanade
+12.87,88.79,MOG2 + SORT
+38.14,70.28,MOG2 + IMM (2-Model)
+18.82,84.03,STMSS (Proposed)

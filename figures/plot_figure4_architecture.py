@@ -1,7 +1,15 @@
 """
 Figure 4: STMSS Asymmetric Cyber-Physical Architecture
-System architecture schematic diagram
+System architecture schematic diagram.
+
+The T_comp label on the diagram is read from the raw Culex_Transit
+STMSS latency CSV at render time, so the figure does not hardcode any
+manuscript-locked value. T_mech = 25.0 ms is the EXAIR Super Air Knife
+manufacturer datasheet constant.
 """
+
+import csv
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -13,6 +21,46 @@ plt.rcParams['font.size'] = 10
 plt.rcParams['axes.linewidth'] = 1.5
 plt.rcParams['figure.dpi'] = 600
 plt.rcParams['savefig.dpi'] = 600
+
+STMSS_RAW_CSV = (
+    Path(__file__).resolve().parent.parent
+    / "data" / "csv" / "table1_semantic_baselines.csv"
+)
+
+
+def _read_stmss_tcomp_ms() -> float:
+    """Return the STMSS Culex_Transit mean latency (T_comp) read at
+    render time from the raw per-frame measurement CSV. The
+    T_comp label on the architecture diagram is populated from this
+    value; no manuscript-locked constant is hardcoded in this script.
+
+    Raises:
+        FileNotFoundError: if the raw measurement CSV is missing.
+        RuntimeError: if the STMSS Culex_Transit row cannot be located.
+    """
+    if not STMSS_RAW_CSV.exists():
+        raise FileNotFoundError(
+            f"Raw STMSS latency CSV not found: {STMSS_RAW_CSV}. "
+            "This file is the single source of truth for the Figure 4 "
+            "T_comp label; do not run this script without it."
+        )
+    header = None
+    with open(STMSS_RAW_CSV, "r", newline="") as fh:
+        for line in fh:
+            stripped = line.lstrip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            cells = next(csv.reader([line.rstrip("\r\n")]))
+            if header is None:
+                header = cells
+                continue
+            row = dict(zip(header, cells))
+            if (row.get("Pipeline") == "STMSS"
+                    and row.get("Sequence") == "Culex_Transit"):
+                return float(row["Mean_ms"])
+    raise RuntimeError(
+        f"STMSS Culex_Transit row not found in {STMSS_RAW_CSV}"
+    )
 
 
 def draw_camera_icon(ax, x, y, size=0.4):
@@ -104,28 +152,28 @@ def create_figure4():
     ax.annotate('', xy=(12.05, 4.5), xytext=(12.05, 6.5),
                 arrowprops=arrow_style)
     
-    ax.text(5.1, 6.2, r'$T_{comp} \approx 18.82$ ms',
+    ax.text(5.1, 6.2, rf'$T_{{comp}} \approx {_read_stmss_tcomp_ms():.2f}$ ms',
             ha='center', fontsize=9, color=colors['success'],
             fontweight='bold',
             bbox=dict(boxstyle='round,pad=0.3', facecolor='lightgreen', alpha=0.5))
-    
+
     ax.text(12.05, 5.0, r'$T_{mech} = 25.0$ ms',
             ha='center', fontsize=9, color=colors['danger'],
             fontweight='bold',
             bbox=dict(boxstyle='round,pad=0.3', facecolor='#ffcccc', alpha=0.5))
-    
-    ax.text(7, 10.3, 'Figure 4: STMSS Asymmetric Cyber-Physical Architecture',
-            ha='center', fontsize=14, fontweight='bold')
-    ax.text(7, 9.8, 'Three-Stage Edge Processing Pipeline with Sub-20ms Latency',
-            ha='center', fontsize=11, style='italic')
-    
+
+    # No embedded title (EAAI supplies the caption separately)
+
     plt.tight_layout()
-    
-    plt.savefig('Figure4_Architecture.pdf',
+
+    out_dir = Path(__file__).resolve().parent
+    plt.savefig(out_dir / 'Figure4_Architecture.pdf',
                 bbox_inches='tight', facecolor='white')
-    plt.savefig('Figure4_Architecture.png',
+    plt.savefig(out_dir / 'Figure4_Architecture.png',
+                bbox_inches='tight', facecolor='white', dpi=600)
+    plt.savefig(out_dir / 'Figure4_Architecture.svg',
                 bbox_inches='tight', facecolor='white')
-    
+
     print("Figure 4 generated: Architecture Diagram")
 
 

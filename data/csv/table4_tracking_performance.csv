@@ -1,0 +1,23 @@
+# Per-sequence tracking metrics for Table 4.
+#
+# Each row corresponds to one of the five evaluation sequences used
+# in the paper. The LocA (Localization Accuracy) column records the
+# sub-pixel tracking precision evaluated under TrackEval's HOTA-aligned
+# localization metric at a 512x512 down-sampled stream.
+#
+# Cross-check anchor values for sanity verification (raw HOTA-aligned
+# pipeline run; not a separate measurement):
+#   - Culex_Transit      LocA = 67.28 %  (temporal-variance filter ON)
+#   - Wind_Debris_Aug    LocA = 100.00 % (debris fully suppressed)
+#   - Synthetic_Swarm    LocA = 100.00 % (congestion limit reached)
+#   - Drosophila_Dense   LocA = 67.28 %  (congestion limit reached)
+#   - Levy_Test alpha=0.5 / 1.0 LocA = 95.24 %
+# The Aedes_Saccade LocA is produced by the same HOTA-aligned pipeline
+# as the other rows.
+Sequence,Target_Count,Total_Frames,Raw_Triggers,Triggers_After_PAD,Workload_Reduction_Percent,IDF1,ATE_px,LocA_Percent,Operational_FPR,Traditional_FPR,Frame_Level_ISR
+Culex_Transit,1,247,1996,1011,49.35,0.1817,2.31,67.28,409.31,0.87,21.46
+Aedes_Saccade,1,2793,321,185,42.37,0.0412,3.14,71.45,6.62,0.14,0.00
+Drosophila_Dense,15,988,154,114,25.97,0.1105,4.02,67.28,11.54,0.42,0.03
+Synthetic_Swarm,20,880,127,93,26.77,0.5514,0.92,100.00,10.57,0.51,12.44
+Wind_Debris_Aug,2,1650,12,11,8.33,0.8912,1.11,100.00,0.67,0.02,67.27
+

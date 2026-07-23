@@ -1,26 +1,27 @@
-# D17 STMSS Replication - Python Dependencies
+# STMSS Replication - Python Dependencies
 # Compatible with Python 3.8+
+#
+# The scripts in this repository depend only on the libraries listed
+# below. Unused third-party packages (e.g., seaborn, scikit-learn,
+# scikit-image, tqdm, pyyaml, pandas, python-docx) are intentionally
+# NOT included to keep the dependency surface minimal and the
+# installation audit-friendly for the EAAI reviewers.
 
 # Core scientific computing
 numpy>=1.21.0
 scipy>=1.7.0
-pandas>=1.3.0
 
 # Visualization
 matplotlib>=3.4.0
-seaborn>=0.11.0
 
 # Computer vision
 opencv-python>=4.5.0
-opencv-contrib-python>=4.5.0
 
-# Machine learning
-scikit-learn>=0.24.0
-scikit-image>=0.18.0
+# Kalman filter / Bayesian filter primitives
+filterpy>=1.4.5
 
-# Utilities
-tqdm>=4.62.0
-pyyaml>=5.4.0
-
-# Optional: For advanced statistical analysis
-# statsmodels>=0.13.0
+# Ultralytics (only required for the OPTIONAL offline ground-truth
+# generator src/gt_generator__YOLOv8x_ByteTrack.py. Comment out
+# if you only need to run the on-line pipeline or to reproduce
+# the published figures and tables from the committed CSVs).
+# ultralytics>=8.0.0

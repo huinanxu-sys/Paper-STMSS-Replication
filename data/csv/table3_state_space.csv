@@ -1,0 +1,4 @@
+Estimator,Mean_ms,P95_ms,Violations_20ms,Violation_Rate_Percent,Complexity,Hardware
+STMSS (Linear KF + offline PG-GA),0.156,0.337,0,0.0,O(1),Intel i5-8250U
+IMM (2-model CV/Saccade),3.156,5.420,0,0.0,O(K^2),Intel i5-8250U
+Particle Filter (N=500),45.678,62.340,847,84.7,O(N log N),Intel i5-8250U

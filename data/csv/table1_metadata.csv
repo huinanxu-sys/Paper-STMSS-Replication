@@ -1,0 +1,23 @@
+# Per-pipeline Table 1 metadata. This file is configuration +
+# Wind_Debris_Aug aggregate outcomes. The [Pipeline] section is
+# configuration (the hardware label for each pipeline; all five are
+# Pure CPU). The [Debris_Rejection_Percent] section records the
+# fraction of wind-blown debris correctly suppressed by each
+# pipeline on the Wind_Debris_Augmented evaluation sequence; the
+# raw per-frame suppression flags are not split out into a per-
+# sequence CSV (the single Wind_Debris_Aug aggregate is what the
+# manuscript reports).
+[Pipeline]
+Pipeline,Hardware
+YOLOv8n + ByteTrack,Pure CPU
+MOG2 + Lucas-Kanade,Pure CPU
+MOG2 + SORT,Pure CPU
+MOG2 + IMM (2-Model),Pure CPU
+STMSS (Proposed),Pure CPU
+
+[Debris_Rejection_Percent]
+Pipeline,Rate
+MOG2 + Lucas-Kanade,12.4
+MOG2 + SORT,18.7
+MOG2 + IMM (2-Model),21.0
+STMSS (Proposed),89.1

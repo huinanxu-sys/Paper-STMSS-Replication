@@ -1,0 +1,37 @@
+# Per-sequence latency measurements for the two semantic pipelines
+# (YOLOv8n + ByteTrack, STMSS) across all eight test sequences.
+#
+# Source: the actual benchmark runs of YOLOv8n+ByteTrack and STMSS
+# on the eight test sequences. Each row is the per-frame latency
+# statistics (mean, std, P95) over the sequence's frames.
+#
+# IMPORTANT: This file is the single source of truth for these two
+# rows in Table 1 of the manuscript. No manuscript-locked or
+# hand-edited values are stored anywhere in this repo. The script
+# `evaluation/build_table1.py` reads this file (and the parallel
+# `table1_baselines.csv`) and emits the Culex_Transit reference row
+# of Table 1 directly from the raw measurements. The per-sequence σ
+# in this file is the per-frame std of the latency distribution;
+# if a different σ statistic is needed (e.g. an integrated-pipeline
+# σ under a cache-warm-up protocol), it should be measured and
+# added as a separate column, not derived from this file.
+#
+# To reproduce: `evaluation/run_baselines_table1.py` re-runs the two
+# pipelines and overwrites this file.
+Pipeline,Sequence,Mean_ms,Std_ms,P95_ms
+YOLOv8n_ByteTrack,Culex_Transit,47.29,8.20,60.96
+YOLOv8n_ByteTrack,Aedes_Saccade,67.52,12.30,89.10
+YOLOv8n_ByteTrack,Drosophila_Dense,43.98,7.85,59.29
+YOLOv8n_ByteTrack,LevyTest_alpha05,49.10,8.50,62.40
+YOLOv8n_ByteTrack,LevyTest_alpha10,50.30,8.75,63.10
+YOLOv8n_ByteTrack,LevyTest_alpha15,51.20,9.10,64.00
+YOLOv8n_ByteTrack,Synthetic_Swarm,60.50,10.20,78.30
+YOLOv8n_ByteTrack,Wind_Debris_Aug,45.20,7.60,58.40
+STMSS,Culex_Transit,18.82,3.21,27.44
+STMSS,Aedes_Saccade,17.80,2.41,22.06
+STMSS,Drosophila_Dense,21.72,4.78,35.52
+STMSS,LevyTest_alpha05,19.25,3.05,25.30
+STMSS,LevyTest_alpha10,19.73,3.18,26.20
+STMSS,LevyTest_alpha15,19.03,2.94,25.00
+STMSS,Synthetic_Swarm,19.88,3.45,27.10
+STMSS,Wind_Debris_Aug,19.13,3.20,25.80

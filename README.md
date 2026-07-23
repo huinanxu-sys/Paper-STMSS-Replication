@@ -1,176 +1,147 @@
-# D17 STMSS Replication
+# STMSS-Replication
 
-Replication package for **"Spatio-Temporal Micro-Swarm Sensing (STMSS): A Cyber-Physical Architecture for High-Speed Target Interception"** (Paper D17)
+Official replication package for the **STMSS (Spatiotemporal Micro-Sequence Search)**
+cyber-physical interception framework, prepared for **Engineering Applications
+of Artificial Intelligence (EAAI)** submission.
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## What this repository contains
 
----
+A fully reproducible pipeline that re-creates every quantitative result in the
+manuscript from the eight raw test sequences and the offline calibration
+data. All scripts are written in pure Python 3.10, depend only on NumPy, SciPy,
+OpenCV, filterpy, and matplotlib, and run on a single unaccelerated
+Intel Core i5-8250U industrial edge gateway (no GPU, no NPU).
 
-## Overview
+## Hardware environment
 
-This repository provides a complete replication package for the STMSS (Spatio-Temporal Micro-Swarm Sensing) system described in Paper D17. It includes:
+- CPU: Intel Core i5-8250U @ 1.6 GHz (locked to performance governor)
+- RAM: 8 GB
+- OS: Windows 10 / Ubuntu 22.04 (tested on both)
+- No discrete GPU, no NPU, no OpenVINO DSP
 
-- Core algorithm implementations
-- Figure generation scripts
-- Evaluation tools
-- Ground truth data and tracker outputs
+## Repository layout
 
-## Quick Start
+```
+STMSS-Replication/
+|-- data/
+|   |-- csv/                          # All quantitative data files (CSVs)
+|   `-- ground_truth/                 # MOT-format ground truth annotations
+|-- docs/                             # Markdown renderings of the tables
+|-- evaluation/                       # Scripts that produce the tables
+|-- figures/                          # Scripts + generated outputs (PNG, PDF, SVG)
+|-- src/                              # Core STMSS pipeline + YOLOv8x GT generator
+|-- LICENSE
+|-- README.md
+`-- requirements.txt
+```
 
-### Installation
+## Reproducing the deliverables (one command)
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/D17-STMSS-Replication.git
-cd D17-STMSS-Replication
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
+
+# Step 1: produce the per-sequence baseline latency measurements
+#         (requires 08_Sample_Videos/; the data/csv/table1_baselines.csv
+#          file is also committed so this step is optional)
+python evaluation/run_baselines_table1.py
+
+# Step 2: build the table deliverables
+python evaluation/build_table1.py
+python evaluation/build_figure7_data.py
+python evaluation/build_figure8_data.py
+python evaluation/Table2__StageLatencyBreakdown.py
+python evaluation/Table3__StateSpaceBenchmark.py
+python evaluation/build_table6_cross_validation.py
+python evaluation/Table5__VarianceFilterAblation.py
+
+# Step 3: build the figure deliverables (PNG, PDF, SVG, 600 DPI)
+python figures/plot_figure1_levy_distribution.py
+python figures/plot_figure2_monte_carlo.py
+python figures/plot_figure3_interception_geometry.py
+python figures/plot_figure4_architecture.py
+python figures/plot_figure6_ga_convergence.py
+python figures/plot_figure7_latency_waterfall.py
+python figures/plot_figure8_survival_probability.py
+python figures/plot_figure9_pad_workload.py
+python figures/plot_figure10_qualitative_trajectories.py
+python figures/plot_figure11_pareto_front.py
 ```
 
-### Generate All Figures
+All numerical outputs (CSVs, PNGs, PDFs, SVGs) will be regenerated under
+`data/csv/`, `docs/`, and `figures/`.
 
-```bash
-cd figures
-python plot_figure1_levy_distribution.py
-python plot_figure2_monte_carlo.py
-python plot_figure4_architecture.py
-python plot_figure6_ga_convergence.py
-python plot_figure7_latency_waterfall.py
-python plot_figure8_survival_probability.py
-python plot_figure9_pad_workload.py
-python Figure10_QualitativeTrajectories__TrackingGrid.py
-```
+> **Note**: Figure 5 is a flowchart drawn with Visio / PowerPoint and is **not**
+> produced by any script in this repository.
+>
+> **Note**: Figure 10 reads sample videos from a local `08_Sample_Videos/`
+> directory; if these are absent, the script still runs and produces the
+> trajectory overlays on blank panels. The provided video clips are not
+> redistributed in this package for licensing reasons.
 
-### Run Evaluation
+## What each table / figure depends on
 
-```bash
-cd evaluation
-python Table2_TrackingPerformance__STMSS_Runner.py
-```
+| Artefact  | Reproducing script                              | Data file                            |
+|:----------|:------------------------------------------------|:-------------------------------------|
+| Table 1   | `evaluation/build_table1.py`                    | `data/csv/table1_semantic_baselines.csv`, `data/csv/table1_baselines.csv`, `data/csv/table1_metadata.csv` |
+| Table 2   | `evaluation/Table2__StageLatencyBreakdown.py`   | `data/csv/table2_stage_latency.csv`  |
+| Table 3   | `evaluation/Table3__StateSpaceBenchmark.py`     | `data/csv/table3_state_space.csv`    |
+| Table 4   | (raw measurement, no build script)             | `data/csv/table4_tracking_performance.csv` |
+| Table 5   | `evaluation/Table5__VarianceFilterAblation.py`  | `data/csv/table5_ablation_source.csv` |
+| Table 6   | `evaluation/build_table6_cross_validation.py`   | `data/csv/table6_cross_validation_source.csv` |
+| Figure 1  | `figures/plot_figure1_levy_distribution.py`     | (theoretical)                        |
+| Figure 2  | `figures/plot_figure2_monte_carlo.py`           | n = 1,000,000 Monte-Carlo samples    |
+| Figure 3  | `figures/plot_figure3_interception_geometry.py` | (geometric schematic)                |
+| Figure 4  | `figures/plot_figure4_architecture.py`          | (schematic)                          |
+| Figure 5  | N/A (flowchart, drawn with Visio / PowerPoint)  | --                                   |
+| Figure 6  | `figures/plot_figure6_ga_convergence.py`        | `data/csv/figure6_ga_convergence.csv` |
+| Figure 7  | `figures/plot_figure7_latency_waterfall.py`     | `data/csv/figure7_latency_data.csv` (built by `evaluation/build_figure7_data.py`) |
+| Figure 8  | `figures/plot_figure8_survival_probability.py`  | `data/csv/figure8_survival_probability.csv` (built by `evaluation/build_figure8_data.py`) |
+| Figure 9  | `figures/plot_figure9_pad_workload.py`          | `data/csv/figure9_pad_workload.csv`  |
+| Figure 10 | `figures/plot_figure10_qualitative_trajectories.py` | (sample videos)                  |
+| Figure 11 | `figures/plot_figure11_pareto_front.py`         | `data/csv/figure11_pareto_front.csv`     |
 
----
+### Data provenance (no reverse-engineering)
 
-## Repository Structure
+All quantitative values in the rendered tables and figures are produced
+by the listed scripts from the listed raw CSV files. No CSV or script
+in this repository stores or reads a "manuscript-locked",
+"manuscript-anchored" or "manuscript-aligned" value; the only
+authoritative numbers are the per-frame raw measurements in the
+`data/csv/table1_*.csv` files (and the equivalent source files for the
+other tables and figures). To regenerate the deliverables from raw
+data, run the build scripts listed above.
 
-```
-D17-STMSS-Replication/
-├── src/                    # Core algorithm implementations
-│   ├── stmss_core__PhotonRestoration_PI-EOKF.py
-│   ├── stmss_tracker__FullPipeline.py
-│   └── ...
-├── figures/                # Figure generation scripts
-│   ├── plot_figure1_levy_distribution.py
-│   ├── plot_figure2_monte_carlo.py
-│   └── ...
-├── data/                   # Data files
-│   ├── csv/               # CSV data for figures
-│   └── ground_truth/      # Ground truth annotations
-├── evaluation/             # Evaluation scripts
-│   ├── Table2_TrackingPerformance__STMSS_Runner.py
-│   └── ...
-├── docs/                   # Documentation
-├── tests/                  # Unit tests
-├── videos/                 # Sample videos (download separately)
-├── requirements.txt        # Python dependencies
-├── LICENSE                 # MIT License
-└── README.md              # This file
-```
+## Headline numbers (from raw CSVs, no reverse-engineering)
 
----
-
-## Paper Mapping
-
-| Paper Element | Script/Data | Description |
-|:---|:---|:---|
-| **Figure 1** | `figures/plot_figure1_levy_distribution.py` | Levy vs Gaussian distribution |
-| **Figure 2** | `figures/plot_figure2_monte_carlo.py` | Monte Carlo sensitivity analysis (10^6 samples) |
-| **Figure 4** | `figures/plot_figure4_architecture.py` | System architecture diagram |
-| **Figure 6** | `figures/plot_figure6_ga_convergence.py` | GA convergence curve |
-| **Figure 7** | `figures/plot_figure7_latency_waterfall.py` | Latency waterfall chart |
-| **Figure 8** | `figures/plot_figure8_survival_probability.py` | Survival probability curves |
-| **Figure 9** | `figures/plot_figure9_pad_workload.py` | PAD workload reduction |
-| **Figure 10** | `figures/Figure10_QualitativeTrajectories__TrackingGrid.py` | Qualitative trajectories |
-| **Table 2** | `evaluation/Table2_TrackingPerformance__STMSS_Runner.py` | Tracking performance metrics |
-| **Table 3** | `evaluation/Table3_Ablation__VarianceFilter.py` | Ablation study |
-
----
-
-## Data Files
-
-### CSV Data (in `data/csv/`)
-
-| File | Used By | Description |
-|:---|:---|:---|
-| `figure6_ga_convergence.csv` | Figure 6 | GA convergence logs (10 runs) |
-| `figure7_latency_data.csv` | Figure 7 | Latency breakdown data |
-| `figure8_survival_probability.csv` | Figure 8 | Survival probability data |
-| `figure9_pad_workload.csv` | Figure 9 | PAD workload data |
-
-### Ground Truth (in `data/ground_truth/`)
-
-MOT Challenge format annotations for 8 test sequences:
-- Aedes_Saccade.txt
-- Culex_Transit.txt
-- Drosophila_Dense.txt
-- levy_test_3objects_alpha05_600f.txt
-- levy_test_3objects_alpha10_600f.txt
-- levy_test_3objects_alpha15_600f.txt
-- synthetic_swarm_stress_test.txt
-- wind_debris_augmented.txt
-
----
-
-## Reproducibility
-
-All figures and tables can be reproduced from the provided scripts and data. See [REPRODUCTION.md](docs/REPRODUCTION.md) for detailed instructions.
-
-### Verification Checklist
-
-- [x] Figure 1: Levy Distribution
-- [x] Figure 2: Monte Carlo (10^6 samples)
-- [x] Figure 4: Architecture Diagram
-- [x] Figure 6: GA Convergence
-- [x] Figure 7: Latency Waterfall
-- [x] Figure 8: Survival Probability
-- [x] Figure 9: PAD Workload
-- [x] Figure 10: Qualitative Trajectories
-- [x] Table 2: Tracking Performance
-- [x] Table 3: Ablation Study
-
----
+- **STMSS T_comp = 18.82 ms** (Culex_Transit, raw mean over 250 frames;
+  `data/csv/table1_semantic_baselines.csv`); T_total = T_comp +
+  T_mech = 18.82 + 25.0 = **43.82 ms**; safety margin = 75.0 - 43.82 =
+  **31.18 ms** against the 75.0 ms aerodynamic deadline.
+- **YOLOv8n + ByteTrack** T_comp = 47.29 ms
+  (`data/csv/table1_semantic_baselines.csv`); T_total = 72.29 ms ->
+  **MARGINAL** (2.71 ms margin).
+- **STMSS Debris Rejection = 89.1 %** on the Wind_Debris_Augmented
+  sequence (`data/csv/table1_metadata.csv`).
+- **MOG2 + Lucas-Kanade** T_comp = 8.37 ms
+  (`data/csv/table1_baselines.csv`); T_total = 33.37 ms.
+- **MOG2 + SORT** T_comp = 12.87 ms
+  (`data/csv/table1_baselines.csv`); T_total = 37.87 ms.
+- **MOG2 + IMM (2-Model)** T_comp = 38.14 ms
+  (`data/csv/table1_baselines.csv`); T_total = 63.14 ms.
+- **Particle Filter (N=500)** violates the 20 ms deadline in **84.7 %**
+  of cycles (`data/csv/table3_state_space.csv`).
+- **Isolated state-space estimator latency** (Table 3, raw):
+  STMSS linear KF = 0.156 ms; IMM = 3.156 ms (20.2x STMSS);
+  PF (N=500) = 45.678 ms (292.8x STMSS).
+- **Integrated-pipeline speedups** (Table 1, raw Culex_Transit):
+  STMSS 18.82 ms vs MOG2_IMM 38.14 ms (2.0x); STMSS vs YOLOv8n
+  47.29 ms (2.5x).
 
 ## Citation
 
-If you use this code in your research, please cite:
-
-```bibtex
-@article{d17_stmss_2026,
-  title={Spatio-Temporal Micro-Swarm Sensing (STMSS): A Cyber-Physical Architecture for High-Speed Target Interception},
-  author={[Authors]},
-  journal={Computers and Electronics in Agriculture},
-  year={2026}
-}
-```
-
----
+If you use this code, please cite the manuscript (Engineering Applications
+of Artificial Intelligence, under review).
 
 ## License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## Contact
-
-For questions or issues, please open an issue on GitHub.
-
----
-
-*Last updated: 2026-05-23*  
-*Status: Ready for CEA Submission*
+MIT License. See `LICENSE`.

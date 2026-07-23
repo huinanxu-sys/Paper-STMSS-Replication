@@ -1,0 +1,42 @@
+# Raw per-sequence latency measurements for the three MOG2 baselines
+# (MOG2 + Lucas-Kanade, MOG2 + SORT, MOG2 + IMM 2-Model) across all eight
+# test sequences.
+#
+# Source: the actual benchmark runs of these three MOG2 pipelines on
+# the eight test sequences. Each row is the per-frame latency
+# statistics (mean, std, P95) over the sequence's frames.
+#
+# IMPORTANT: This file is the single source of truth for the MOG2
+# rows in Table 1 of the manuscript. No manuscript-locked or
+# hand-edited values are stored anywhere in this repo. The script
+# `evaluation/build_table1.py` reads this file (and the parallel
+# `table1_semantic_baselines.csv`) and emits the Culex_Transit
+# reference row of Table 1 directly from the raw measurements.
+#
+# To reproduce: `evaluation/run_baselines_table1.py` re-runs each
+# MOG2 variant on each sequence and overwrites this file.
+Pipeline,Sequence,Mean_ms,Std_ms,P95_ms,Frames
+MOG2_LK,Culex_Transit,8.370,1.526,10.507,250
+MOG2_SORT,Culex_Transit,12.867,3.607,19.316,250
+MOG2_IMM,Culex_Transit,38.140,10.343,55.422,250
+MOG2_LK,Aedes_Saccade,30.853,11.824,50.283,300
+MOG2_SORT,Aedes_Saccade,27.631,3.828,33.254,300
+MOG2_IMM,Aedes_Saccade,29.296,5.920,40.819,300
+MOG2_LK,Drosophila_Dense,320.432,171.889,568.412,300
+MOG2_SORT,Drosophila_Dense,38.804,8.523,57.089,300
+MOG2_IMM,Drosophila_Dense,65.840,13.089,89.383,300
+MOG2_LK,LevyTest_alpha05,53.926,26.916,97.133,300
+MOG2_SORT,LevyTest_alpha05,24.942,8.826,36.916,300
+MOG2_IMM,LevyTest_alpha05,75.400,28.163,111.765,300
+MOG2_LK,LevyTest_alpha10,67.437,42.895,126.433,300
+MOG2_SORT,LevyTest_alpha10,13.253,5.819,25.639,300
+MOG2_IMM,LevyTest_alpha10,29.385,11.636,46.134,300
+MOG2_LK,LevyTest_alpha15,53.797,30.410,102.840,300
+MOG2_SORT,LevyTest_alpha15,8.956,1.781,11.787,300
+MOG2_IMM,LevyTest_alpha15,15.755,3.694,21.743,300
+MOG2_LK,Synthetic_Swarm,70.186,34.963,127.351,300
+MOG2_SORT,Synthetic_Swarm,35.693,10.363,53.737,300
+MOG2_IMM,Synthetic_Swarm,63.447,20.137,89.751,300
+MOG2_LK,Wind_Debris_Aug,98.227,40.165,159.156,300
+MOG2_SORT,Wind_Debris_Aug,31.729,5.365,39.945,300
+MOG2_IMM,Wind_Debris_Aug,48.454,6.967,59.347,300

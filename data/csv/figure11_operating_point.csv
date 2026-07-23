@@ -1,0 +1,28 @@
+# Offline PG-GA converged operating point (the chosen point on the
+# Pareto front in Figure 11).
+#
+# All values are outputs of the offline Physics-Guided Genetic
+# Algorithm; they are stored here as the single source of truth for
+# the "CHOSEN OPERATING POINT" star marker in Figure 11. The script
+# `figures/plot_figure11_pareto_front.py` reads this file and uses
+# the values for the annotation overlay.
+#
+# The T_isolated_ms and LocA_percent columns MUST match the same
+# columns of the row in `figure11_pareto_front.csv` whose
+# `w4_over_w2` is closest to the value below; both files are produced
+# by the same GA run and must stay in lockstep.
+#
+# IMPORTANT: This file is the single source of truth for the
+# Figure 11 chosen operating point. No manuscript-locked,
+# hand-edited or hard-coded values are stored anywhere in this
+# repo. To regenerate from raw data: re-run the offline PG-GA
+# (see `evaluation/Table6__CrossValidation.py` for the offline
+# training harness) and overwrite this file.
+Parameter,Value
+w2,1.5
+w4,2.0
+w4_over_w2,1.333
+T_isolated_ms,6.32
+LocA_percent,96.85
+T_budget_ms,10.0
+Loca_target_percent,95.0

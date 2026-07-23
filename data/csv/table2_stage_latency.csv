@@ -1,0 +1,7 @@
+Component,Description,Mean_ms,Percentage_of_Total,Measurement_Protocol
+Stage A,Photon-Starved Signal Restoration (Entropy Max),1.60,8.5,"EAAI isolation, gc disabled, 100 warmup iters"
+Stage B,Spatio-Temporal Motion Saliency Detection,4.60,24.4,"EAAI isolation, gc disabled, 100 warmup iters"
+Stage C,PI-EOKF Online State Estimation (Linear KF Isolated),0.12,0.6,"EAAI isolation, gc disabled, 100 warmup iters"
+Subtotal,Sum of Stages A + B + C (pure compute),6.32,33.6,"Arithmetic sum of stages A + B + C"
+Overhead,"Video I/O, Decoding, Memory Management, Python Toolchain",12.50,66.4,Derived: End-to-End minus Subtotal
+End-to-End,Full pipeline wall-clock (STMSS operating point),18.82,100.0,"EAAI isolation, gc disabled, 100 warmup iters"

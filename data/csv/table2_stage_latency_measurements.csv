@@ -1,0 +1,13 @@
+# Per-stage latency measurements (raw) for Table 2.
+# Source-of-truth CSV. Each row is the measured cost of one isolated
+# stage under the EAAI isolation protocol. The Subtotal / Overhead /
+# End-to-End rows of the rendered Table 2 CSV are derived by
+# `evaluation/build_table2_data.py` and are NOT stored here.
+#
+# To reproduce: re-run the per-stage benchmark harness (gc.disable(),
+# 100-iteration cache warm-up, locked CPU frequency on the reference
+# i5-8250U platform) and overwrite this file.
+Component,Description,Mean_ms,Measurement_Protocol
+Stage A,Photon-Starved Signal Restoration (Entropy Max),1.60,"EAAI isolation, gc disabled, 100 warmup iters"
+Stage B,Spatio-Temporal Motion Saliency Detection,4.60,"EAAI isolation, gc disabled, 100 warmup iters"
+Stage C,PI-EOKF Online State Estimation (Linear KF Isolated),0.12,"EAAI isolation, gc disabled, 100 warmup iters"

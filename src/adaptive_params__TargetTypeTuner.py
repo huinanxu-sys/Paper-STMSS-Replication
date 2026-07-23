@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-自适应参数调优系统
-根据视频特征自动调整追踪参数
+Adaptive Parameter Tuning System.
+
+Automatically adjusts tracking parameters based on video characteristics
+(target type, resolution, frame rate, brightness, motion intensity).
+This module is a reference implementation that produces the parameter
+templates used as the prior for the offline PG-GA optimisation.
+
+All identifiers, comments, and report strings are in English to match
+the EAAI journal submission requirements.
 """
 
 import cv2
@@ -12,17 +19,17 @@ from enum import Enum
 
 
 class TargetType(Enum):
-    """目标类型枚举"""
-    MOSQUITO = "mosquito"      # 蚊虫：高速小目标
-    ANT = "ant"                # 蚂蚁：中速小目标
-    DROSOPHILA = "drosophila"  # 果蝇：高速小目标
-    MOUSE = "mouse"            # 小鼠：中低速大目标
-    UNKNOWN = "unknown"        # 未知类型
+    """Enumeration of biological target categories."""
+    MOSQUITO = "mosquito"       # mosquito: high-speed small target
+    ANT = "ant"                 # ant: medium-speed small target
+    DROSOPHILA = "drosophila"   # fruit fly: high-speed small target
+    MOUSE = "mouse"             # mouse: medium/low-speed large target
+    UNKNOWN = "unknown"         # unknown target
 
 
 @dataclass
 class VideoCharacteristics:
-    """视频特征数据类"""
+    """Container for the measured characteristics of a video stream."""
     resolution: Tuple[int, int]
     fps: float
     brightness: float
@@ -33,34 +40,34 @@ class VideoCharacteristics:
 
 @dataclass
 class TrackingParameters:
-    """追踪参数数据类"""
-    # 检测参数
+    """Container for the tuned tracking parameters."""
+    # Detection parameters
     min_contour_area: int
     max_contour_area: int
-    
-    # 追踪参数
+
+    # Tracking parameters
     max_disappeared: int
     max_distance: int
-    
-    # Kalman滤波参数
+
+    # Kalman filter parameters
     kalman_process_noise: float
     kalman_measurement_noise: float
-    
-    # 背景减除参数
+
+    # Background subtraction parameters
     bg_history: int
     bg_var_threshold: int
-    
-    # Lévy飞行参数
+
+    # Levy flight parameters
     levy_alpha: float
     min_trajectory_length: int
-    
-    # 置信度阈值
+
+    # Confidence threshold
     confidence_threshold: float
-    
-    # 低光增强参数
+
+    # Low-light enhancement parameters
     low_light_threshold: int
     clahe_clip_limit: float
-    
+
     def to_dict(self) -> Dict:
         return {
             'min_contour_area': self.min_contour_area,
@@ -81,11 +88,14 @@ class TrackingParameters:
 
 class AdaptiveParameterTuner:
     """
-    自适应参数调优器
-    根据视频特征和目标类型自动选择最优参数
+    Adaptive parameter tuner.
+
+    Analyses a video stream and automatically selects optimal tracking
+    parameters based on the inferred target type and observed scene
+    statistics (brightness, motion intensity, resolution, fps).
     """
-    
-    # 预设参数模板
+
+    # Pre-defined parameter templates per target type
     PARAMETER_TEMPLATES = {
         TargetType.MOSQUITO: {
             'min_contour_area': 20,
@@ -163,77 +173,77 @@ class AdaptiveParameterTuner:
             'clahe_clip_limit': 3.0
         }
     }
-    
+
     def __init__(self):
-        self.video_chars = None
-        self.base_params = None
-        
+        self.video_chars: Optional[VideoCharacteristics] = None
+        self.base_params: Optional[TrackingParameters] = None
+
     def analyze_video(self, video_path: str, sample_frames: int = 30) -> VideoCharacteristics:
         """
-        分析视频特征
-        
+        Analyse the visual statistics of an input video.
+
         Args:
-            video_path: 视频文件路径
-            sample_frames: 采样帧数
-            
+            video_path: path to the input video file.
+            sample_frames: number of frames to sample for the analysis.
+
         Returns:
-            VideoCharacteristics: 视频特征
+            VideoCharacteristics describing the observed stream.
         """
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
-            raise ValueError(f"无法打开视频: {video_path}")
-        
-        # 基本视频信息
+            raise ValueError(f"Cannot open video: {video_path}")
+
+        # Basic video metadata
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        
-        # 分析亮度和运动
+
+        # Brightness and motion estimation buffers
         brightness_values = []
         motion_scores = []
-        
+
         ret, prev_frame = cap.read()
         if not ret:
             cap.release()
-            raise ValueError(f"无法读取视频帧: {video_path}")
-        
+            raise ValueError(f"Cannot read video frames: {video_path}")
+
         prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
         brightness_values.append(prev_gray.mean())
-        
+
         frame_step = max(1, total_frames // sample_frames)
         frame_count = 1
-        
+
         while frame_count < sample_frames:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_count * frame_step)
             ret, frame = cap.read()
             if not ret:
                 break
-            
+
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             brightness_values.append(gray.mean())
-            
-            # 计算光流
+
+            # Dense optical flow for motion intensity
             flow = cv2.calcOpticalFlowFarneback(
                 prev_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0
             )
             motion = cv2.norm(flow, cv2.NORM_L2)
             motion_scores.append(motion)
-            
+
             prev_gray = gray
             frame_count += 1
-        
+
         cap.release()
-        
+
         avg_brightness = np.mean(brightness_values)
         avg_motion = np.mean(motion_scores) if motion_scores else 0
-        
-        # 自动识别目标类型
+
+        # Automatic target type inference
         target_type = self._detect_target_type(video_path, avg_motion, avg_brightness)
-        
-        # 估计目标大小
+
+        # Estimated target size in pixels
         est_size = self._estimate_target_size(target_type, (width, height))
-        
+
         self.video_chars = VideoCharacteristics(
             resolution=(width, height),
             fps=fps,
@@ -242,13 +252,13 @@ class AdaptiveParameterTuner:
             estimated_target_size=est_size,
             target_type=target_type
         )
-        
+
         return self.video_chars
-    
+
     def _detect_target_type(self, video_path: str, motion: float, brightness: float) -> TargetType:
-        """根据视频路径和特征检测目标类型"""
+        """Infer the target type from filename cues and motion statistics."""
         path_lower = video_path.lower()
-        
+
         if 'mosquito' in path_lower or 'fly' in path_lower:
             return TargetType.MOSQUITO
         elif 'ant' in path_lower:
@@ -258,7 +268,7 @@ class AdaptiveParameterTuner:
         elif 'mice' in path_lower or 'mouse' in path_lower:
             return TargetType.MOUSE
         else:
-            # 基于运动特征推断
+            # Heuristic fallback based on motion magnitude
             if motion > 400:
                 return TargetType.MOUSE
             elif motion > 350:
@@ -267,153 +277,152 @@ class AdaptiveParameterTuner:
                 return TargetType.MOSQUITO
             else:
                 return TargetType.ANT
-    
+
     def _estimate_target_size(self, target_type: TargetType, resolution: Tuple[int, int]) -> str:
-        """估计目标大小"""
+        """Estimate the expected target size in pixels for the given type."""
         size_map = {
-            TargetType.MOSQUITO: "10-50像素",
-            TargetType.ANT: "20-80像素",
-            TargetType.DROSOPHILA: "15-60像素",
-            TargetType.MOUSE: "100-500像素",
-            TargetType.UNKNOWN: "50-200像素"
+            TargetType.MOSQUITO: "10-50 px",
+            TargetType.ANT: "20-80 px",
+            TargetType.DROSOPHILA: "15-60 px",
+            TargetType.MOUSE: "100-500 px",
+            TargetType.UNKNOWN: "50-200 px"
         }
-        return size_map.get(target_type, "未知")
-    
+        return size_map.get(target_type, "unknown")
+
     def get_optimal_parameters(self, video_path: str = None) -> TrackingParameters:
         """
-        获取最优追踪参数
-        
+        Retrieve the tuned tracking parameters.
+
         Args:
-            video_path: 视频路径（如果之前未分析）
-            
+            video_path: optional path used to lazily analyse the video.
+
         Returns:
-            TrackingParameters: 最优参数
+            TrackingParameters tuned to the observed stream.
         """
         if self.video_chars is None and video_path is not None:
             self.analyze_video(video_path)
-        
+
         if self.video_chars is None:
-            raise ValueError("请先分析视频或提供视频路径")
-        
-        # 获取基础参数模板
+            raise ValueError("Please analyse a video first or provide a video path.")
+
+        # Retrieve the base parameter template
         base_params = self.PARAMETER_TEMPLATES[self.video_chars.target_type].copy()
-        
-        # 根据视频特征微调
+
+        # Fine-tune based on the observed characteristics
         adjusted_params = self._fine_tune_parameters(base_params)
-        
+
         self.base_params = TrackingParameters(**adjusted_params)
         return self.base_params
-    
+
     def _fine_tune_parameters(self, base_params: Dict) -> Dict:
-        """根据视频特征微调参数"""
+        """Fine-tune the base parameter set using the observed video statistics."""
         params = base_params.copy()
         chars = self.video_chars
-        
-        # 1. 根据分辨率调整检测区域
+
+        # 1. Adjust detection area thresholds by resolution
         width, height = chars.resolution
-        resolution_scale = np.sqrt(width * height) / np.sqrt(608 * 342)  # 相对于参考分辨率
-        
-        # 调整轮廓面积阈值
+        resolution_scale = np.sqrt(width * height) / np.sqrt(608 * 342)  # relative to reference
+
         params['min_contour_area'] = int(params['min_contour_area'] * resolution_scale)
         params['max_contour_area'] = int(params['max_contour_area'] * resolution_scale * resolution_scale)
-        
-        # 2. 根据帧率调整追踪参数
-        fps_scale = chars.fps / 24.0  # 相对于24fps
+
+        # 2. Adjust tracking parameters by frame rate
+        fps_scale = chars.fps / 24.0  # relative to 24 fps
         params['max_disappeared'] = int(params['max_disappeared'] * fps_scale)
         params['max_distance'] = int(params['max_distance'] * fps_scale)
-        
-        # 3. 根据亮度调整低光参数
+
+        # 3. Adjust low-light parameters by brightness
         if chars.brightness < 60:
-            # 低光环境
+            # Low-light environment
             params['low_light_threshold'] = int(chars.brightness * 0.8)
             params['clahe_clip_limit'] = min(4.0, params['clahe_clip_limit'] + 0.5)
             params['min_contour_area'] = int(params['min_contour_area'] * 0.7)
         elif chars.brightness > 200:
-            # 强光环境
+            # Bright environment
             params['low_light_threshold'] = int(chars.brightness * 0.9)
             params['bg_var_threshold'] = int(params['bg_var_threshold'] * 1.2)
-        
-        # 4. 根据运动强度调整
+
+        # 4. Adjust by motion intensity
         if chars.motion_intensity > 500:
-            # 高强度运动
+            # High-motion scenario
             params['kalman_process_noise'] *= 1.2
             params['max_distance'] = int(params['max_distance'] * 1.3)
         elif chars.motion_intensity < 200:
-            # 低强度运动
+            # Low-motion scenario
             params['kalman_process_noise'] *= 0.8
             params['max_disappeared'] = int(params['max_disappeared'] * 1.2)
-        
-        # 5. 根据目标类型调整Lévy参数
+
+        # 5. Adjust Levy parameters by target type
         if chars.target_type in [TargetType.MOSQUITO, TargetType.DROSOPHILA]:
-            # 高速飞行昆虫：更严格的轨迹要求
+            # High-speed flying insects: stricter trajectory requirements
             params['min_trajectory_length'] = max(5, int(params['min_trajectory_length'] * 0.8))
             params['levy_alpha'] = max(1.0, params['levy_alpha'] - 0.1)
-        
+
         return params
-    
+
     def generate_parameter_report(self) -> str:
-        """生成参数调优报告"""
+        """Generate a human-readable parameter tuning report."""
         if self.video_chars is None or self.base_params is None:
-            return "请先分析视频并获取参数"
-        
+            return "Please analyse a video and obtain parameters first."
+
         report = []
         report.append("=" * 80)
-        report.append("自适应参数调优报告")
+        report.append("Adaptive Parameter Tuning Report")
         report.append("=" * 80)
-        
-        report.append("\n【视频特征分析】")
-        report.append(f"  分辨率: {self.video_chars.resolution[0]}x{self.video_chars.resolution[1]}")
-        report.append(f"  帧率: {self.video_chars.fps:.2f} FPS")
-        report.append(f"  平均亮度: {self.video_chars.brightness:.1f}")
-        report.append(f"  运动强度: {self.video_chars.motion_intensity:.2f}")
-        report.append(f"  目标类型: {self.video_chars.target_type.value}")
-        report.append(f"  估计目标大小: {self.video_chars.estimated_target_size}")
-        
-        report.append("\n【优化后的追踪参数】")
+
+        report.append("\n[Video Characteristics Analysis]")
+        report.append(f"  Resolution:    {self.video_chars.resolution[0]}x{self.video_chars.resolution[1]}")
+        report.append(f"  Frame rate:    {self.video_chars.fps:.2f} FPS")
+        report.append(f"  Mean brightness: {self.video_chars.brightness:.1f}")
+        report.append(f"  Motion intensity: {self.video_chars.motion_intensity:.2f}")
+        report.append(f"  Target type:   {self.video_chars.target_type.value}")
+        report.append(f"  Estimated target size: {self.video_chars.estimated_target_size}")
+
+        report.append("\n[Optimised Tracking Parameters]")
         params = self.base_params.to_dict()
-        
-        report.append("\n  检测参数:")
-        report.append(f"    - 最小轮廓面积: {params['min_contour_area']}")
-        report.append(f"    - 最大轮廓面积: {params['max_contour_area']}")
-        
-        report.append("\n  追踪参数:")
-        report.append(f"    - 最大消失帧数: {params['max_disappeared']}")
-        report.append(f"    - 最大匹配距离: {params['max_distance']}")
-        
-        report.append("\n  Kalman滤波参数:")
-        report.append(f"    - 过程噪声: {params['kalman_process_noise']:.3f}")
-        report.append(f"    - 测量噪声: {params['kalman_measurement_noise']:.1f}")
-        
-        report.append("\n  背景减除参数:")
-        report.append(f"    - 历史帧数: {params['bg_history']}")
-        report.append(f"    - 方差阈值: {params['bg_var_threshold']}")
-        
-        report.append("\n  Lévy飞行参数:")
-        report.append(f"    - Lévy指数: {params['levy_alpha']:.2f}")
-        report.append(f"    - 最小轨迹长度: {params['min_trajectory_length']}")
-        
-        report.append("\n  置信度参数:")
-        report.append(f"    - 置信度阈值: {params['confidence_threshold']:.2f}")
-        
-        report.append("\n  低光增强参数:")
-        report.append(f"    - 低光阈值: {params['low_light_threshold']}")
-        report.append(f"    - CLAHE限制: {params['clahe_clip_limit']:.1f}")
-        
+
+        report.append("\n  Detection parameters:")
+        report.append(f"    - Min contour area: {params['min_contour_area']}")
+        report.append(f"    - Max contour area: {params['max_contour_area']}")
+
+        report.append("\n  Tracking parameters:")
+        report.append(f"    - Max disappeared frames: {params['max_disappeared']}")
+        report.append(f"    - Max matching distance:  {params['max_distance']}")
+
+        report.append("\n  Kalman filter parameters:")
+        report.append(f"    - Process noise: {params['kalman_process_noise']:.3f}")
+        report.append(f"    - Measurement noise: {params['kalman_measurement_noise']:.1f}")
+
+        report.append("\n  Background subtraction parameters:")
+        report.append(f"    - History frames:  {params['bg_history']}")
+        report.append(f"    - Variance threshold: {params['bg_var_threshold']}")
+
+        report.append("\n  Levy flight parameters:")
+        report.append(f"    - Levy index alpha: {params['levy_alpha']:.2f}")
+        report.append(f"    - Min trajectory length: {params['min_trajectory_length']}")
+
+        report.append("\n  Confidence parameters:")
+        report.append(f"    - Confidence threshold: {params['confidence_threshold']:.2f}")
+
+        report.append("\n  Low-light enhancement parameters:")
+        report.append(f"    - Low-light threshold: {params['low_light_threshold']}")
+        report.append(f"    - CLAHE clip limit: {params['clahe_clip_limit']:.1f}")
+
         report.append("\n" + "=" * 80)
-        
+
         return "\n".join(report)
 
 
-# 便捷函数
+# Convenience helpers
 def get_adaptive_params(video_path: str) -> Tuple[TrackingParameters, str]:
     """
-    获取视频的自适应参数
-    
+    Convenience wrapper that returns the tuned parameters and the report.
+
     Args:
-        video_path: 视频文件路径
-        
+        video_path: path to the input video file.
+
     Returns:
-        (TrackingParameters, report): 参数和报告
+        (TrackingParameters, report) tuple.
     """
     tuner = AdaptiveParameterTuner()
     tuner.analyze_video(video_path)
@@ -423,18 +432,18 @@ def get_adaptive_params(video_path: str) -> Tuple[TrackingParameters, str]:
 
 
 if __name__ == "__main__":
-    # 测试代码
+    # Test entry point
     import sys
-    
+
     if len(sys.argv) > 1:
         video_path = sys.argv[1]
     else:
         video_path = "samples/Flying_Mosquito.mp4"
-    
-    print(f"\n分析视频: {video_path}\n")
-    
+
+    print(f"\nAnalysing video: {video_path}\n")
+
     try:
         params, report = get_adaptive_params(video_path)
         print(report)
     except Exception as e:
-        print(f"错误: {e}")
+        print(f"Error: {e}")
