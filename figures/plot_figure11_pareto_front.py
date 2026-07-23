@@ -11,8 +11,7 @@ benchmark.
 
 The "CHOSEN OPERATING POINT" star marker and its annotation overlay
 are read at render time from the canonical operating-point CSV
-(``data/csv/figure11_operating_point.csv``); no manuscript-locked
-value is hardcoded in this script.
+(``data/csv/figure11_operating_point.csv``).
 
 Data sources:
   - Pareto front curve:    data/csv/figure11_pareto_front.csv
@@ -40,7 +39,7 @@ plt.rcParams['figure.dpi'] = 600
 plt.rcParams['savefig.dpi'] = 600
 
 # ---------------------------------------------------------------------------
-# Data files (single source of truth; no hard-coded values).
+# Data files (single source of truth).
 # ---------------------------------------------------------------------------
 THIS_DIR = Path(__file__).resolve().parent
 DATA_DIR = THIS_DIR.parent / "data" / "csv"
@@ -68,9 +67,7 @@ def _load_pareto_csv(csv_path: Path) -> list:
 def _load_operating_point(csv_path: Path) -> dict:
     """Load the offline PG-GA converged operating point from
     ``csv_path``. Returns a dict with the parameter names as keys.
-    Raises ``FileNotFoundError`` if the CSV is missing; the
-    downstream code MUST NOT fall back to hard-coded defaults, so a
-    missing file is a hard error."""
+    Raises ``FileNotFoundError`` if the CSV is missing."""
     if not csv_path.exists():
         raise FileNotFoundError(
             f"Operating-point CSV not found: {csv_path}. "
@@ -87,8 +84,8 @@ def _load_operating_point(csv_path: Path) -> dict:
 
 def _read_stmss_e2e_ms(csv_path: Path) -> float:
     """Return the STMSS Culex_Transit mean latency from the raw
-    per-frame measurement CSV. Used only for the "this is NOT on the
-    plot" annotation that points reviewers to the wall-clock number."""
+    per-frame measurement CSV. Used only for the end-to-end
+    annotation overlay on the Pareto front."""
     with open(csv_path, "r", newline="") as fh:
         header = None
         for line in fh:
@@ -111,8 +108,7 @@ def _read_stmss_e2e_ms(csv_path: Path) -> float:
 def _read_table2_stage_latencies(csv_path: Path) -> dict:
     """Return {Component: Mean_ms} from the canonical Table 2 CSV.
     Used to label the Subtotal annotation in Figure 11 with the
-    real per-stage numbers, so the figure does not hardcode any
-    manuscript value."""
+    real per-stage numbers."""
     out = {}
     with open(csv_path, "r", newline="") as fh:
         header = None

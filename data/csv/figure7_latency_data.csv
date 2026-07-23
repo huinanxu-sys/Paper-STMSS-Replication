@@ -18,9 +18,8 @@
 # respectively, not measurements.
 #
 # IMPORTANT: This file is the single source of truth for the
-# figure-7 bars. No manuscript-locked, hand-edited or hard-coded
-# values are stored anywhere in this repo. To regenerate from raw
-# data: `python evaluation/build_figure7_data.py`.
+# figure-7 bars. To regenerate from raw data:
+# `python evaluation/build_figure7_data.py`.
 #
 # Pipeline ordering matches the legend convention in the manuscript
 # (semantic baseline first, MOG2 baselines in the middle, proposed last).

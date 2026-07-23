@@ -3,9 +3,8 @@ Figure 4: STMSS Asymmetric Cyber-Physical Architecture
 System architecture schematic diagram.
 
 The T_comp label on the diagram is read from the raw Culex_Transit
-STMSS latency CSV at render time, so the figure does not hardcode any
-manuscript-locked value. T_mech = 25.0 ms is the EXAIR Super Air Knife
-manufacturer datasheet constant.
+STMSS latency CSV at render time. T_mech = 25.0 ms is the EXAIR Super
+Air Knife manufacturer datasheet constant.
 """
 
 import csv
@@ -32,7 +31,7 @@ def _read_stmss_tcomp_ms() -> float:
     """Return the STMSS Culex_Transit mean latency (T_comp) read at
     render time from the raw per-frame measurement CSV. The
     T_comp label on the architecture diagram is populated from this
-    value; no manuscript-locked constant is hardcoded in this script.
+    value.
 
     Raises:
         FileNotFoundError: if the raw measurement CSV is missing.

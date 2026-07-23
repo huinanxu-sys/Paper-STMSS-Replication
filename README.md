@@ -100,18 +100,11 @@ All numerical outputs (CSVs, PNGs, PDFs, SVGs) will be regenerated under
 | Figure 10 | `figures/plot_figure10_qualitative_trajectories.py` | (sample videos)                  |
 | Figure 11 | `figures/plot_figure11_pareto_front.py`         | `data/csv/figure11_pareto_front.csv`     |
 
-### Data provenance (no reverse-engineering)
+### Data provenance
 
-All quantitative values in the rendered tables and figures are produced
-by the listed scripts from the listed raw CSV files. No CSV or script
-in this repository stores or reads a "manuscript-locked",
-"manuscript-anchored" or "manuscript-aligned" value; the only
-authoritative numbers are the per-frame raw measurements in the
-`data/csv/table1_*.csv` files (and the equivalent source files for the
-other tables and figures). To regenerate the deliverables from raw
-data, run the build scripts listed above.
+All quantitative values in the rendered tables and figures are produced by the listed scripts from the listed raw CSV files. The only authoritative numbers are the per-frame raw measurements in the `data/csv/table1_*.csv` files (and the equivalent source files for the other tables and figures). To regenerate the deliverables from raw data, run the build scripts listed above.
 
-## Headline numbers (from raw CSVs, no reverse-engineering)
+## Headline numbers (from raw CSVs)
 
 - **STMSS T_comp = 18.82 ms** (Culex_Transit, raw mean over 250 frames;
   `data/csv/table1_semantic_baselines.csv`); T_total = T_comp +

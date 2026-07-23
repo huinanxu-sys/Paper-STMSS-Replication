@@ -1,6 +1,6 @@
 """
 Figure 6: GA Convergence Curve
-Data loaded from CSV, no hard-coded values
+Data loaded from CSV.
 """
 
 import csv

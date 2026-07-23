@@ -2,7 +2,7 @@
 
 Hardware: Intel Core i5-8250U @ 1.6 GHz, 8 GB RAM (CPU only). All measurements on the same 512x512 down-sampled stream.
 
-**What this table reports.** Each row is the *Culex_Transit* deadline-calibration reference row from the raw per-sequence measurement CSVs (`data/csv/table1_semantic_baselines.csv` and `data/csv/table1_baselines.csv`). The other seven sequences are present in those same CSVs for audit but are not aggregated into the headline mean. The headline mean, σ and P95 are the per-frame statistics of the Culex_Transit sequence under the EAAI latency protocol (pre-loaded observations, `gc.disable()`, 100-iteration cache warm-up, locked CPU frequency). No manuscript-locked or hand-edited values are used in this table; the values flow directly from the raw CSVs into the rendered output.
+**What this table reports.** Each row is the *Culex_Transit* deadline-calibration reference row from the raw per-sequence measurement CSVs (`data/csv/table1_semantic_baselines.csv` and `data/csv/table1_baselines.csv`). The other seven sequences are present in those same CSVs for audit but are not aggregated into the headline mean. The headline mean, σ and P95 are the per-frame statistics of the Culex_Transit sequence under the EAAI latency protocol (pre-loaded observations, `gc.disable()`, 100-iteration cache warm-up, locked CPU frequency). The values flow directly from the raw CSVs into the rendered output.
 
 | Pipeline | Hardware | T_comp (ms) | σ (ms) | P95 (ms) | T_mech (ms) | T_total (ms) | T_allow (ms) | Margin (ms) | Debris Rejection | Actuation Status |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|

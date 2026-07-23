@@ -7,8 +7,7 @@ This script is the SINGLE source of truth for the per-pipeline T_comp /
 P_capture points used by ``figures/plot_figure8_survival_probability.py``.
 
 The values flow directly from the raw Culex_Transit measurements and the
-deterministic escape-boundary formula; no manuscript-locked, hand-edited
-or hard-coded values are used anywhere in this script.
+deterministic escape-boundary formula.
 
 Data flow:
 
@@ -31,7 +30,7 @@ where the exponential time-constant tau is fit to the physical model
 R / v_esc = 15 cm / 2.0 m/s = 75 ms (the deterministic worst-case
 allowance) and a half-saturation empirical anchor at T_comp = 75 ms
 yields P_capture = 50%. The curve rows sample this deterministic
-function at 5 ms intervals; they are NOT manuscript-locked.
+function at 5 ms intervals.
 
 The pipeline rows are the raw Culex_Transit T_comp measurements for the
 five pipelines; their P_capture values are read off the deterministic

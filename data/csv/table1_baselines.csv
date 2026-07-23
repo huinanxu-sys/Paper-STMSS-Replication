@@ -7,8 +7,7 @@
 # statistics (mean, std, P95) over the sequence's frames.
 #
 # IMPORTANT: This file is the single source of truth for the MOG2
-# rows in Table 1 of the manuscript. No manuscript-locked or
-# hand-edited values are stored anywhere in this repo. The script
+# rows in Table 1 of the manuscript. The script
 # `evaluation/build_table1.py` reads this file (and the parallel
 # `table1_semantic_baselines.csv`) and emits the Culex_Transit
 # reference row of Table 1 directly from the raw measurements.

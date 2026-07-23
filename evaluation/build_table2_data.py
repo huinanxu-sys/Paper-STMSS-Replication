@@ -3,8 +3,7 @@ Table 2 builder: produces ``data/csv/table2_stage_latency.csv`` from
 two raw per-stage CSVs and the raw Table 1 measurement CSV.
 
 This script is the SINGLE source of truth for Table 2. The values flow
-directly from the raw measurements -- no manuscript-locked,
-hand-edited or hard-coded values are used anywhere in this script.
+directly from the raw measurements.
 
 Data flow:
 
@@ -16,8 +15,7 @@ Data flow:
     data/csv/table1_semantic_baselines.csv
         STMSS Culex_Transit mean latency. Source: the integrated
         end-to-end benchmark under the same EAAI protocol. Used to
-        derive the End-to-End and Overhead rows so they are NOT
-        manuscript-locked.
+        derive the End-to-End and Overhead rows.
 
 Derived rows (in the rendered CSV):
     Subtotal  = Stage A + Stage B + Stage C  (pure compute)
@@ -62,8 +60,7 @@ def _load_csv_dicts(path: Path) -> list:
 
 def _read_stmss_e2e_ms() -> float:
     """Return the STMSS Culex_Transit mean latency from the raw
-    per-frame Table 1 measurement CSV. This is the authoritative
-    end-to-end number; it is NOT hard-coded anywhere."""
+    per-frame Table 1 measurement CSV."""
     for row in _load_csv_dicts(STMSS_RAW_CSV):
         if (row.get("Pipeline") == STMSS_KEY
                 and row.get("Sequence") == CANONICAL_SEQUENCE):

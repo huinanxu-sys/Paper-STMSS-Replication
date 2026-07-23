@@ -6,8 +6,7 @@ Spatio-Temporal Motion Saliency System for micro-vector detection
 in photon-starved environments. The on-line pipeline is parameterised
 by a target_latency_ms configuration value (see ``STMSSConfig``); the
 integrated end-to-end latency on the Culex_Transit reference sequence
-is reported in ``data/csv/table1_semantic_baselines.csv`` and is not
-hardcoded in this file.
+is reported in ``data/csv/table1_semantic_baselines.csv``.
 """
 
 import cv2
@@ -554,8 +553,8 @@ def test_stmss_tracker():
     print("      Production-grade results are produced by the high-density")
     print("      agricultural video benchmark, not by this test.")
 
-    # Use the configuration's default target_latency_ms; do not hardcode
-    # any value here. The test prints the threshold from the config so
+    # Use the configuration's default target_latency_ms.
+    # The test prints the threshold from the config so
     # the synthetic-frame result is interpretable without coupling the
     # source code to any specific quantitative target in the paper.
     config = STMSSConfig()

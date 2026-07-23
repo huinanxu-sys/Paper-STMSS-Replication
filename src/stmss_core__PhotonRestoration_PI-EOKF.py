@@ -180,8 +180,7 @@ class PhotonStarvedRestoration:
         Fast version for real-time processing.
 
         Uses integral image approximation for O(1) entropy calculation.
-        The latency target is taken from ``self.config.target_latency_ms``;
-        no manuscript-locked value is hardcoded here.
+        The latency target is taken from ``self.config.target_latency_ms``.
         """
         if len(image.shape) == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

@@ -4,9 +4,7 @@ the two raw per-sequence baseline CSVs.
 
 This script is the SINGLE source of truth for the per-pipeline latency
 rows used by ``figures/plot_figure7_latency_waterfall.py``. The values
-flow directly from the raw Culex_Transit measurements -- no manuscript-
-locked, hand-edited or hard-coded values are used anywhere in this
-script.
+flow directly from the raw Culex_Transit measurements.
 
 Data flow:
 

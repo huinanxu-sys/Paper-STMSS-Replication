@@ -6,9 +6,7 @@ Reads the *raw* per-sequence latency measurements from the
 output (``data/csv/table1.csv`` plus a markdown rendering at
 ``docs/Table1.md``).
 
-**No manuscript-locked, hand-edited or hard-coded values are used
-anywhere in this script.** All quantitative data flows from the
-two raw measurement CSVs:
+All quantitative data flows from the two raw measurement CSVs:
 
     data/csv/table1_semantic_baselines.csv
         YOLOv8n+ByteTrack and STMSS, eight sequences each.
@@ -166,8 +164,7 @@ def status(total):
 def build_table():
     """Aggregate the per-sequence raw measurements into a single
     Table 1 view, anchored on the Culex_Transit deadline-calibration
-    reference row. No manuscript-locked values are used; the values
-    here come directly from the two raw CSVs.
+    reference row. The values here come directly from the two raw CSVs.
 
     The "Culex_Transit reference" means: the row's mean, std and
     P95 are the per-frame statistics of that sequence. The other
@@ -256,8 +253,7 @@ def write_markdown(aggregated, sequences, out_path):
         "the headline mean. The headline mean, σ and P95 are the per-frame "
         "statistics of the Culex_Transit sequence under the EAAI latency "
         "protocol (pre-loaded observations, `gc.disable()`, 100-iteration "
-        "cache warm-up, locked CPU frequency). No manuscript-locked or "
-        "hand-edited values are used in this table; the values flow "
+        "cache warm-up, locked CPU frequency). The values flow "
         "directly from the raw CSVs into the rendered output."
     )
     lines.append("")

@@ -14,9 +14,7 @@
 #     curve at that T_comp (i.e. computed, not measured).
 #
 # IMPORTANT: This file is the single source of truth for the
-# figure-8 markers. No manuscript-locked, hand-edited or
-# hard-coded values are stored anywhere in this repo. To
-# regenerate from raw data:
+# figure-8 markers. To regenerate from raw data:
 #     `python evaluation/build_figure8_data.py`
 T_comp_ms,P_capture_percent,Pipeline
 5.00,95.49,Curve

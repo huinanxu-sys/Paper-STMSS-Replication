@@ -13,11 +13,9 @@
 # by the same GA run and must stay in lockstep.
 #
 # IMPORTANT: This file is the single source of truth for the
-# Figure 11 chosen operating point. No manuscript-locked,
-# hand-edited or hard-coded values are stored anywhere in this
-# repo. To regenerate from raw data: re-run the offline PG-GA
-# (see `evaluation/Table6__CrossValidation.py` for the offline
-# training harness) and overwrite this file.
+# Figure 11 chosen operating point. To regenerate from raw data:
+# re-run the offline PG-GA (see `evaluation/Table6__CrossValidation.py`
+# for the offline training harness) and overwrite this file.
 Parameter,Value
 w2,1.5
 w4,2.0
